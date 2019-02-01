@@ -18,16 +18,16 @@ from .utils import get_root
 
 
 DIR_ROOT = get_root()
-DIR_ASSETS = os.path.join(DIR_ROOT, 'assets')
-DATA_DIR = os.path.join(DIR_ASSETS, 'data')
-EMBEDDING_DIR = os.path.join(DIR_ASSETS, 'embedding', 'fasttext-crawl-300d-2m')
+DIR_ASSETS = os.path.join(DIR_ROOT, "assets")
+DATA_DIR = os.path.join(DIR_ASSETS, "data")
+EMBEDDING_DIR = os.path.join(DIR_ASSETS, "embedding", "fasttext-crawl-300d-2m")
 
 
-TASKS = ['TrainData', 'Embedding']
-TASK2PATH = {'TrainData': 'https://storage.googleapis.com/kaggle-competitions-data/kaggle/8076/train.csv.zip?GoogleAccessId=web-data@kaggle-161607.iam.gserviceaccount.com&Expires=1544128430&Signature=TGKJMbm2U4xUmsXVNcXuymTIgtuq8LBkrqlmc%2F8H%2BQ06DYm5IevQv9OaZAkKuKey1KYQ6HKjfVIoXWKOQLkN0IZxz1YVH6Vf81EvweVys%2Fvu0NZ33UkZ73iT%2BTkWaKpsOQSfiEQZIPEI%2FEECb7Tvlaj8Nx1l0Ozgh9hSC8juIltL2b%2F5z9nEMpHajnHrHT4zWkt%2BeFUL%2FrvhjrspenB7TBUqoQY9aB74OYZ3K9P4f17d8r5cKOJ7g510eEkrVu7aNYP1U6zueIstjpT1bS5obBDcIWc3rr2KJMj2qabHVzel9%2BWXq0%2BOItH68X0N%2BKqxxJYPiE%2FUnxYqskYNmrWfOg%3D%3D',
-             'Embedding': 'https://s3-us-west-1.amazonaws.com/fasttext-vectors/crawl-300d-2M.vec.zip'}
-TASK2DIR = {'TrainData': DATA_DIR,
-            'Embedding': EMBEDDING_DIR}
+TASKS = ["Embedding"]
+TASK2PATH = {
+    "Embedding": "https://s3-us-west-1.amazonaws.com/fasttext-vectors/crawl-300d-2M.vec.zip"
+}
+TASK2DIR = {"Embedding": EMBEDDING_DIR}
 
 
 def download_and_extract(task, task_url, data_dir):
