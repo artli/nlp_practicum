@@ -105,13 +105,13 @@ class RocAucEvaluation(TensorBoard):
     def on_epoch_end(self, epoch, logs=None):
         super().on_epoch_end(epoch, logs)
 
-        if epoch % self.interval == 0:
-            y_pred = self.model.predict(self.X_val, verbose=0)
-            score = roc_auc_score(self.y_val, y_pred)
-            print("\n ROC-AUC - epoch: %d - score: %.6f \n" % (epoch+1, score))
+        # if epoch % self.interval == 0:
+        #     y_pred = self.model.predict(self.X_val, verbose=0)
+        #     score = np.apply_along_axis(roc_auc_score, 0, self.y_val, y_pred)
+        #     print(f'\nEpoch: {epoch + 1};\tavg. ROC-AUC: {score.mean():.6f};\tclass-wise ROC-AUC: {score}\n')
 
 
-def get_model(maxlen, max_features, embed_size, embedding_matrix):
+def get_model(maxlen, max_features, embed_size, embedding_matrix, class_count):
     input = Input(shape=(maxlen, ))
     x = Embedding(max_features, embed_size, weights=[embedding_matrix])(input)
     x = SpatialDropout1D(0.2)(x)
@@ -119,13 +119,12 @@ def get_model(maxlen, max_features, embed_size, embedding_matrix):
     avg_pool = GlobalAveragePooling1D()(x)
     max_pool = GlobalMaxPooling1D()(x)
     conc = concatenate([avg_pool, max_pool])
-    output = Dense(1, activation="sigmoid")(conc)
+    outputs = Dense(class_count, activation="sigmoid")(conc)
 
-    model = Model(inputs=input, outputs=output)
+    model = Model(inputs=input, outputs=outputs)
     model.compile(loss='binary_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
-
     return model
 
 
@@ -137,7 +136,8 @@ def train():
     classes = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 
     features = train["comment_text"].fillna("# #").values
-    target = convert_binary_toxic(train, classes)
+    # target = convert_binary_toxic(train, classes)
+    target = train[classes]
     del train
     gc.collect()
 
@@ -157,12 +157,13 @@ def train():
 
     logger.info(f"Loading embedding vectors: {EMBEDDING_FILE}")
     embedding_matrix = get_embeddings(EMBEDDING_FILE, word_index, MAX_FEATURES, EMBED_SIZE)
+    # embedding_matrix = np.zeros((MAX_FEATURES, EMBED_SIZE))  # For quickly testing the validity of the graph
 
     logger.info(f"Model training, train size: {TRAIN_SIZE}")
     X_train, X_val, y_train, y_val = train_test_split(features, target, train_size=TRAIN_SIZE, random_state=233)
     RocAuc = RocAucEvaluation(log_dir=LOG_PATH, batch_size=BATCH_SIZE, validation_data=(X_val, y_val), interval=1)
 
-    model = get_model(MAXLEN, MAX_FEATURES, EMBED_SIZE, embedding_matrix)
+    model = get_model(MAXLEN, MAX_FEATURES, EMBED_SIZE, embedding_matrix, len(classes))
 
     hist = model.fit(X_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS,
                      validation_data=(X_val, y_val), callbacks=[RocAuc], verbose=1)
