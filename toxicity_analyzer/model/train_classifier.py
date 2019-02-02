@@ -43,6 +43,8 @@ TRAIN_SIZE = 0.95
 BATCH_SIZE = 32
 EPOCHS = 2
 
+CLASSES = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
+
 
 def convert_binary_toxic(data, classes):
     target = data[classes].values != np.zeros((len(data), 6))
@@ -133,11 +135,10 @@ def train():
 
     logger.info(f"Loading data: {DATA_FILE}")
     train = pd.read_csv(DATA_FILE)
-    classes = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 
     features = train["comment_text"].fillna("# #").values
     # target = convert_binary_toxic(train, classes)
-    target = train[classes]
+    target = train[CLASSES]
     del train
     gc.collect()
 
@@ -163,7 +164,7 @@ def train():
     X_train, X_val, y_train, y_val = train_test_split(features, target, train_size=TRAIN_SIZE, random_state=233)
     RocAuc = RocAucEvaluation(log_dir=LOG_PATH, batch_size=BATCH_SIZE, validation_data=(X_val, y_val), interval=1)
 
-    model = get_model(MAXLEN, MAX_FEATURES, EMBED_SIZE, embedding_matrix, len(classes))
+    model = get_model(MAXLEN, MAX_FEATURES, EMBED_SIZE, embedding_matrix, len(CLASSES))
 
     hist = model.fit(X_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS,
                      validation_data=(X_val, y_val), callbacks=[RocAuc], verbose=1)

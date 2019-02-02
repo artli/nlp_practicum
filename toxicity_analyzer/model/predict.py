@@ -4,6 +4,7 @@
 
 import os
 from .utils import get_root, load_pipeline_stages
+from .train_classifier import Preprocess  # for unpickling to work properly
 
 
 ROOT = get_root()
@@ -20,8 +21,7 @@ class PredictionPipeline(object):
 
     def predict(self, text):
         features = self.preprocessor.transform_texts(text)
-        pred = self.model.predict(features)
-        return pred
+        return self.model.predict(features)
 
 
 def load_pipeline():

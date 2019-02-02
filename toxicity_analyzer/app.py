@@ -6,9 +6,11 @@ from wtforms import Form, TextAreaField, validators
 
 from toxicity_analyzer import config
 from toxicity_analyzer.model.predict import load_pipeline
+from toxicity_analyzer.model.train_classifier import CLASSES
 
-from toxicity_analyzer.model import train_classifier
-from toxicity_analyzer.model.train_classifier import Preprocess  # for unpickling to work properly
+# for unpickling to work properly
+# from toxicity_analyzer.model import train_classifier
+from toxicity_analyzer.model.train_classifier import Preprocess
 
 
 DEBUG = True
@@ -26,7 +28,7 @@ class ReusableForm(Form):
 
 def get_toxicity_score(comment):
     with graph.as_default():
-        return pipeline.predict([comment])[0][0]
+        return pipeline.predict([comment])[0]
 
 
 def check_comment_toxicity_naive(comment):
@@ -93,11 +95,14 @@ def hello():
             # flash('Hello ' + name + ' Comment: ' + comment)
             toxic_score = get_toxicity_score(comment)
 
-            toxicity_message = set_toxicity_message(toxic_score)
+            toxicity_message = set_toxicity_message(toxic_score.max())
             print(f"Toxic Score:{toxic_score}")
             print(f"Toxic message:{toxicity_message}")
 
-            flash(f"{toxicity_message} Toxicity Score: {toxic_score:0.2f}. " + \
+            score_description = '; '.join(
+                f'{class_name}: {score:.3f}'
+                for class_name, score in zip(CLASSES, toxic_score))
+            flash(f"{toxicity_message} Toxicity: {score_description}. " +
                   f"Your comment was: {comment}")
 
         else:
