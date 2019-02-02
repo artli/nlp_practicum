@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a1374660c0ec667babf25d78abcddab4de9671fd03ea44e7101b5a90a71d9d7d"
+            "sha256": "30d84d5a9829bbf3155ef7f3e4c5cf3c574bdce780688ed616a1649526a9bfa3"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -33,11 +33,11 @@
         },
         "click": {
             "hashes": [
-                "sha256:2335065e6395b9e67ca716de5f7526736bfa6ceead690adf616d925bdc622b13",
-                "sha256:5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7"
+                "sha256:29f99fc6125fbc931b758dc053b3114e55c77a6e4c6c3a2674a2dc986016381d",
+                "sha256:f15516df478d5a56180fbf80e68f206010e6d160fc39fa508b65e035fd75130b"
             ],
             "index": "pypi",
-            "version": "==7.0"
+            "version": "==6.7"
         },
         "flask": {
             "hashes": [
@@ -431,6 +431,20 @@
             ],
             "index": "pypi",
             "version": "==1.1.0"
+        },
+        "textgenrnn": {
+            "hashes": [
+                "sha256:edd75b073763c325f2f1a46cd003ceb2cc0500d0ac6378c79790f16224e03dba"
+            ],
+            "index": "pypi",
+            "version": "==1.5.0"
+        },
+        "tqdm": {
+            "hashes": [
+                "sha256:13f018038711256ed27aae118a80d63929588e90f00d072a0f4eb7aa3333b4dc",
+                "sha256:dd60ea2567baa013c625153ce41fd274209c69a5814513e1d635f20e5cd61b97"
+            ],
+            "version": "==4.30.0"
         },
         "werkzeug": {
             "hashes": [
