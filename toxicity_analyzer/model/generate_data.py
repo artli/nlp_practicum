@@ -5,19 +5,19 @@ import pandas as pd
 import numpy as np
 import csv
 
+from toxicity_analyzer import config
 from .utils import get_root
 
 DIR_ROOT = get_root()
 DIR_ASSETS = os.path.join(DIR_ROOT, "assets")
 DATA_DIR = os.path.join(DIR_ASSETS, "data")
 
-classes = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 labels = [0, 1]
 
 
 def split_data(df, split, dir=DATA_DIR):
     for label in labels:
-        for class_name in classes:
+        for class_name in config.classes:
             comments = df["comment_text"].where(df[class_name] == label)
             comments=comments.replace(r'^\s+$', np.nan, regex=True).dropna()
             if not comments.empty:

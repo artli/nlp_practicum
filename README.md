@@ -18,6 +18,16 @@ Put the data from [the Kaggle repo](https://www.kaggle.com/c/jigsaw-toxic-commen
 PYTHONPATH=. python -m toxicity_analyzer.model.download
 ```
 
+### Train the classifier
+```shell
+PYTHONPATH=. python -m toxicity_analyzer.model.train_classifier
+```
+
+### Train the generator
+```shell
+PYTHONPATH=. python -m toxicity_analyzer.model.train_generator
+```
+
 ## Run the web app
 
 ```shell

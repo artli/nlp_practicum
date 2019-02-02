@@ -23,18 +23,20 @@ from keras.preprocessing import text, sequence
 from keras.callbacks import TensorBoard
 
 from .utils import get_logger, get_root
-
+from toxicity_analyzer import config
 
 np.random.seed(42)
-warnings.filterwarnings('ignore')
-os.environ['OMP_NUM_THREADS'] = '4'
+warnings.filterwarnings("ignore")
+os.environ["OMP_NUM_THREADS"] = "4"
 
 DIR_ROOT = get_root()
-DIR_ASSETS = os.path.join(DIR_ROOT, 'assets')
-MODEL_PATH = os.path.join(DIR_ASSETS, 'model')
-LOG_PATH = os.path.join(DIR_ASSETS, 'tb_logs')
-EMBEDDING_FILE = os.path.join(DIR_ASSETS, 'embedding', 'fasttext-crawl-300d-2m', 'crawl-300d-2M.vec')
-DATA_FILE = os.path.join(DIR_ASSETS, 'data', 'train.csv')
+DIR_ASSETS = os.path.join(DIR_ROOT, "assets")
+MODEL_PATH = os.path.join(DIR_ASSETS, "model")
+LOG_PATH = os.path.join(DIR_ASSETS, "tb_logs")
+EMBEDDING_FILE = os.path.join(
+    DIR_ASSETS, "embedding", "fasttext-crawl-300d-2m", "crawl-300d-2M.vec"
+)
+DATA_FILE = os.path.join(DIR_ASSETS, "data", "train.csv")
 
 MAX_FEATURES = 30000
 MAXLEN = 100
@@ -42,8 +44,6 @@ EMBED_SIZE = 300
 TRAIN_SIZE = 0.95
 BATCH_SIZE = 32
 EPOCHS = 2
-
-CLASSES = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 
 
 def convert_binary_toxic(data, classes):
@@ -69,9 +69,12 @@ class Preprocess(object):
 
 def get_embeddings(embed_file, word_index, max_features, embed_size):
     def get_coefs(word, *arr):
-        return word, np.asarray(arr, dtype='float32')
+        return word, np.asarray(arr, dtype="float32")
 
-    embeddings_pretrained = dict(get_coefs(*o.rstrip().rsplit(' ')) for o in open(embed_file, encoding="utf8", errors='ignore'))
+    embeddings_pretrained = dict(
+        get_coefs(*o.rstrip().rsplit(" "))
+        for o in open(embed_file, encoding="utf8", errors="ignore")
+    )
 
     nb_words = min(max_features, len(word_index))
     embedding_matrix = np.zeros((nb_words, embed_size))
@@ -86,19 +89,22 @@ def get_embeddings(embed_file, word_index, max_features, embed_size):
 
 
 class RocAucEvaluation(TensorBoard):
-    def __init__(self, log_dir='./logs',
-                 histogram_freq=0,
-                 batch_size=32,
-                 write_graph=True,
-                 write_grads=False,
-                 write_images=False,
-                 embeddings_freq=0,
-                 embeddings_layer_names=None,
-                 embeddings_metadata=None,
-                 embeddings_data=None,
-                 update_freq='epoch',
-                 validation_data=(),
-                 interval=1):
+    def __init__(
+        self,
+        log_dir="./logs",
+        histogram_freq=0,
+        batch_size=32,
+        write_graph=True,
+        write_grads=False,
+        write_images=False,
+        embeddings_freq=0,
+        embeddings_layer_names=None,
+        embeddings_metadata=None,
+        embeddings_data=None,
+        update_freq="epoch",
+        validation_data=(),
+        interval=1,
+    ):
         super().__init__(log_dir=log_dir, batch_size=batch_size)
 
         self.X_val, self.y_val = validation_data
@@ -114,7 +120,7 @@ class RocAucEvaluation(TensorBoard):
 
 
 def get_model(maxlen, max_features, embed_size, embedding_matrix, class_count):
-    input = Input(shape=(maxlen, ))
+    input = Input(shape=(maxlen,))
     x = Embedding(max_features, embed_size, weights=[embedding_matrix])(input)
     x = SpatialDropout1D(0.2)(x)
     x = Bidirectional(GRU(80, return_sequences=True))(x)
@@ -124,9 +130,7 @@ def get_model(maxlen, max_features, embed_size, embedding_matrix, class_count):
     outputs = Dense(class_count, activation="sigmoid")(conc)
 
     model = Model(inputs=input, outputs=outputs)
-    model.compile(loss='binary_crossentropy',
-                  optimizer='adam',
-                  metrics=['accuracy'])
+    model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
     return model
 
 
@@ -137,8 +141,8 @@ def train():
     train = pd.read_csv(DATA_FILE)
 
     features = train["comment_text"].fillna("# #").values
-    # target = convert_binary_toxic(train, classes)
-    target = train[CLASSES]
+    # target = convert_binary_toxic(train, config.classes)
+    target = train[config.classes]
     del train
     gc.collect()
 
@@ -148,35 +152,53 @@ def train():
     features = preprocessor.transform_texts(features)
     word_index = preprocessor.tokenizer.word_index
 
-    PRERPOCESSOR_FILE = os.path.join(MODEL_PATH, 'preprocessor.pkl')
+    PRERPOCESSOR_FILE = os.path.join(MODEL_PATH, "preprocessor.pkl")
     logger.info(f"Saving the text transformer: {PRERPOCESSOR_FILE}")
 
-    with open(PRERPOCESSOR_FILE, 'wb') as file:
+    with open(PRERPOCESSOR_FILE, "wb") as file:
         pickle.dump(preprocessor, file)
     del preprocessor
     gc.collect()
 
     logger.info(f"Loading embedding vectors: {EMBEDDING_FILE}")
-    embedding_matrix = get_embeddings(EMBEDDING_FILE, word_index, MAX_FEATURES, EMBED_SIZE)
+    embedding_matrix = get_embeddings(
+        EMBEDDING_FILE, word_index, MAX_FEATURES, EMBED_SIZE
+    )
     # embedding_matrix = np.zeros((MAX_FEATURES, EMBED_SIZE))  # For quickly testing the validity of the graph
 
     logger.info(f"Model training, train size: {TRAIN_SIZE}")
-    X_train, X_val, y_train, y_val = train_test_split(features, target, train_size=TRAIN_SIZE, random_state=233)
-    RocAuc = RocAucEvaluation(log_dir=LOG_PATH, batch_size=BATCH_SIZE, validation_data=(X_val, y_val), interval=1)
+    X_train, X_val, y_train, y_val = train_test_split(
+        features, target, train_size=TRAIN_SIZE, random_state=233
+    )
+    RocAuc = RocAucEvaluation(
+        log_dir=LOG_PATH,
+        batch_size=BATCH_SIZE,
+        validation_data=(X_val, y_val),
+        interval=1,
+    )
 
-    model = get_model(MAXLEN, MAX_FEATURES, EMBED_SIZE, embedding_matrix, len(CLASSES))
+    model = get_model(
+        MAXLEN, MAX_FEATURES, EMBED_SIZE, embedding_matrix, len(config.classes)
+    )
 
-    hist = model.fit(X_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS,
-                     validation_data=(X_val, y_val), callbacks=[RocAuc], verbose=1)
+    hist = model.fit(
+        X_train,
+        y_train,
+        batch_size=BATCH_SIZE,
+        epochs=EPOCHS,
+        validation_data=(X_val, y_val),
+        callbacks=[RocAuc],
+        verbose=1,
+    )
 
-    ARCHITECTURE_FILE = os.path.join(MODEL_PATH, 'gru_architecture.json')
+    ARCHITECTURE_FILE = os.path.join(MODEL_PATH, "gru_architecture.json")
     logger.info(f"Saving the architecture: {ARCHITECTURE_FILE}")
 
-    with open(ARCHITECTURE_FILE, 'w') as file:
+    with open(ARCHITECTURE_FILE, "w") as file:
         architecture_json = model.to_json()
         file.write(architecture_json)
 
-    WEIGHTS_FILE = os.path.join(MODEL_PATH, 'gru_weights.h5')
+    WEIGHTS_FILE = os.path.join(MODEL_PATH, "gru_weights.h5")
     logger.info(f"Saving the weights: {WEIGHTS_FILE}")
 
     model.save_weights(WEIGHTS_FILE)
