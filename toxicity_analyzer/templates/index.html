@@ -9,14 +9,14 @@
        <meta name="viewport" content = "width=device-width, initial-scale=1.0">
     </head>
     <body>
- 
- 
+
+
         <div class="container">
             <h2 align='center'>Toxic Comments Analyzer</h2>
             <form  action="" method="post" role="form">
                 {{ form.csrf }}
                 <div class="form-group">
-              
+
                     <label for="comment">Comment:</label>
                     <!-- id 'email' being used to please Bootstrap. CHANGE LATER!-->
                     <!-- <input type="text" class="form-control" id="email" name="comment" rows="5" placeholder="Enter your comments.">
@@ -29,11 +29,11 @@
                     Submit
                 </button>
             </form>
-         
+
             <br>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-     
+
             {% for message in messages %}
                 {% if "Success" in message[1]: %}
                     <div class="alert alert-success">
@@ -58,7 +58,7 @@
                         {{ message[1] }}
                     </div>
                 {% endif %}
-     
+
                 {% if "Error" in message[1]: %}
                     <div class="alert alert-warning">
                         {{ message[1] }}
@@ -67,7 +67,7 @@
             {% endfor %}
                 {% endif %}
             {% endwith %}
-         
+
         </div>
     </body>
 </html>

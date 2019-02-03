@@ -9,7 +9,7 @@ DIR_ROOT = get_root()
 DIR_ASSETS = os.path.join(DIR_ROOT, "assets")
 DATA_DIR = os.path.join(DIR_ASSETS, "data")
 MODEL_PATH = os.path.join(DIR_ROOT, "assets", "model")
-WEIGHTS_FILE = os.path.join(MODEL_PATH, "reddit_legaladvice_relationshipadvice.hdf5")
+WEIGHTS_PATH = os.path.join(MODEL_PATH, "reddit_legaladvice_relationshipadvice.hdf5")
 
 model_cfg = {
     "word_level": True,  # set to True if want to train a word-level model (requires more data and smaller max_length)
@@ -37,7 +37,7 @@ def train_on_type(class_type, split_type):
     basename = f"{class_type}_1.{split_type}"
     weights_path = os.path.join(MODEL_PATH, f"{basename}.hd5")
     data_path = os.path.join(DATA_DIR, f"{basename}.csv")
-    textgen = textgenrnn(name=basename, weights_path=WEIGHTS_FILE)
+    textgen = textgenrnn(name=basename, weights_path=WEIGHTS_PATH)
 
     train_function = (
         textgen.train_from_file
